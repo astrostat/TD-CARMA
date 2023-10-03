@@ -3,14 +3,8 @@ import pandas as pd
 import numpy as np
 from eztao.carma import CARMA_term
 
-# output_file = './nest_output/gp_HS2209_c21m2_summary.txt'
-# m = 2
-# p = 2
-# q = 1
-
 # %% Function to extract parameter names
 def parameter_names(m,p,q):
-    #para_names  = ['Delta', 'mu', 'sigma', 'intercept']
     para_names = []
     for i in range(p+q+1):
         para_names.append("carma"+str(i+1))
@@ -90,14 +84,3 @@ def process_results_file(output_file, m, p, q):
         final_df = final_df.drop(1)
 
     return final_df
-
-# %%
-print(pd.read_csv("./new_results/results/PS1606_WFI_results_part3_DA.csv", index_col=0).to_latex(float_format="%.3f"))
-
-# %%
-output_file = "./new_results/gp_DA_PS1606_WFI_c43m3_summary.txt"
-p = 4
-q = 3
-m = 3
-print(process_results_file(output_file, m, p, q).to_latex(float_format="%.3f"))
-# %%
