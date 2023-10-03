@@ -26,8 +26,6 @@ def fcoeff_ll(log_coeffs, y, gp):
     ll = gp.log_likelihood(y, quiet = True)
     return ll
 
-
-
 #%% Choose and import data
 data_file = '2M1134_WFI.csv'
 data = pd.read_csv('./td_carma/data/2M1134_WFI.csv')
@@ -71,8 +69,6 @@ def myprior(cube):
     params = cube.copy()
 
     #CARMA log-coefficients (polynomial form)
-    #params[:p+q+1] = [cube[i]* 16 - 8 for i in range(p+q+1)]
-
     params[:p] = [cube[i]* 14 - 7 for i in range(p)]
 
     params[p: p+q+1] = [cube[i]* 10 - 5 for i in range(p,p+q+1)]
@@ -110,22 +106,13 @@ def gp_timedelay(params,m,p,q, y, z, yerr, zerr, gp):
 
     yzcomb_centered = yzcomb_centered - np.median(yzcomb_centered)
 
-    # #Compute gp
-    # gp.compute(ordered_times, err_comb)
-
-    # #Compute negative log-likelihood
-    # ll = fcoeff_ll(log_carma_coeffs, yzcomb_centered, gp)
-
     ll = -1e30
 
     try:
         gp.compute(ordered_times, err_comb)
         ll = fcoeff_ll(log_carma_coeffs, yzcomb_centered, gp, p)
     except celerite.solver.LinAlgError as c:
-        # print(c)
         pass
-    # except Exception as e:
-    #     pass
 
     return ll
 
@@ -136,7 +123,6 @@ def wrapped_gp_loglike(params):
 
 #%% Function to create array of names for parameters
 def parameter_names(m,p,q):
-    #para_names  = ['Delta', 'mu', 'sigma', 'intercept']
     para_names = []
     for i in range(p+q+1):
         para_names.append("carma_"+str(i+1))
@@ -149,10 +135,8 @@ def parameter_names(m,p,q):
 #%% Initialize MultiNest
 parameters = parameter_names(m,p,q)
 n_params = len(parameters)
-# name of the output files]
 save_dir = './nest_output/'
-#data_file = 'test81818181818'
-prefix = 'gp_BA_'+str(data_file[:-4])+'_c'+str(p)+str(q)+'m'+str(m)+'_'
+prefix = 'gp_'+str(data_file[:-4])+'_c'+str(p)+str(q)+'m'+str(m)+'_'
 
 
 start = time.time()
