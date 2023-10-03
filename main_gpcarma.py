@@ -108,7 +108,6 @@ def fit_tdcarma_gp_(p, q, m, data = data):
         return ll
 
     def parameter_names(m,p,q):
-        #para_names  = ['Delta', 'mu', 'sigma', 'intercept']
         para_names = []
         for i in range(p+q+1):
             para_names.append("carma_"+str(i+1))
@@ -121,12 +120,11 @@ def fit_tdcarma_gp_(p, q, m, data = data):
     #Initialize MultiNest
     parameters = parameter_names(m,p,q)
     n_params = len(parameters)
-    # name of the output files]
     save_dir = './nest_output/'
-    prefix = 'gp_CA_'+str(data_file[:-4])+'_c'+str(p)+str(q)+'m'+str(m)+'_'
+    prefix = 'gp_'+str(data_file[:-4])+'_c'+str(p)+str(q)+'m'+str(m)+'_'
 
     # Run MultiNest
-    result = solve(LogLikelihood=gp_timedelay, Prior=myprior, n_live_points = 500, importance_nested_sampling = False, multimodal = True, 
+    result = solve(LogLikelihood=gp_timedelay, Prior=myprior, n_live_points = 1000, importance_nested_sampling = False, multimodal = True, 
         use_MPI = True, n_dims=n_params, verbose=False,outputfiles_basename=save_dir+prefix, resume=True)
     
     result_file_name = save_dir+prefix+'summary.txt'
@@ -138,8 +136,8 @@ def fit_tdcarma_gp(vec):
     return fit_tdcarma_gp_(vec[0], vec[1], vec[2])
 
 # %% Choose models to fit
-pq = [[4,1]]
-m = [3]
+pq = [[2,1], [3,1]]
+m = [1,2,3]
 
 #%% Prepare combined input for simulation
 cobi = list(itertools.product(pq, m))
@@ -151,14 +149,12 @@ n_cores = 6
 # %% Fit model to data
 if __name__ == '__main__':
     with Pool(n_cores) as p:
-        #result = p.map(integ_lik, cobi)
         result = list(tqdm.tqdm(p.imap(fit_tdcarma_gp, cobi_vec), total = len(cobi_vec)))
 
 # %% Final dataframe
 final_df = pd.concat(result, ignore_index=True)
 
 # %% pickle output
-#save_dir = './results/'
 save_dir = ''
 filename = save_dir+data_file[:-4]+'_results.pkl'
 final_df.to_pickle(filename)
